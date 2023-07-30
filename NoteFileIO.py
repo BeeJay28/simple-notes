@@ -2,7 +2,7 @@ from pathlib import Path
 
 class NoteFileIO():
     """Naming policy: filename = {note_title}.pln"""
-    _notes_path = Path("/home/artur/projects/simple_notes/Notes/")
+    _notes_path = Path("/home/artur/projects/simple_notes/notes/")
 
     @property
     def notes_path(self):
