@@ -20,17 +20,20 @@ class NotePicker(Gtk.Window):
 
         self.add(notepicker_window)
 
+
+    # TODO: Refresh the filesystem by adding newly added notes into it, either by adding it to the store on add
+    # OR by reloading the entire thing by using the "map-event" signal from this window
     def get_files_store(self):
         note_files = self.note_file_io.get_note_files()
 
         liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
 
+        pixbuf = Gtk.IconTheme.get_default().load_icon(icon, 64, 0)
         for note_file in note_files:
-            print(note_file)
-            pixbuf = Gtk.IconTheme.get_default().load_icon(icon, 64, 0)
             liststore.append([pixbuf, note_file.stem]) # FIXME: oder .split(".")[0]
         
         return liststore
+    
 
     def setup_notepicker_window(self, liststore):
         main_vbox = Gtk.Box()
@@ -52,18 +55,17 @@ class NotePicker(Gtk.Window):
 
         open_button = Gtk.Button(label="Open")
         create_button = Gtk.Button(label="Create")
-        cancel_button = Gtk.Button(label="Cancel")
+        exit_button = Gtk.Button(label="Exit")
         open_button.connect("clicked", self.on_open_button_clicked, icon_view)
         create_button.connect("clicked", lambda _ : self.open_note_window())
-        cancel_button.connect("clicked", self.on_cancel_button_clicked)
         bbar.add(open_button)
         bbar.add(create_button)
-        bbar.add(cancel_button)
 
         main_vbox.pack_start(icon_view, True, True, 20)
         main_vbox.pack_start(bbar, False, False, 20)
 
         return main_vbox
+    
     
     def on_open_button_clicked(self, _, icon_view):
         if len(icon_view.get_selected_items()) == 0:
@@ -71,25 +73,28 @@ class NotePicker(Gtk.Window):
         
         tree_path = icon_view.get_selected_items()[0]
         model = icon_view.get_model()
-        row_number = tree_path.get_indices()[0] # since we always only have one selected element
+        # since we always only have one selected element
+        row_number = tree_path.get_indices()[0]
         note_title = model[row_number][1]
         note_content = self.note_file_io.read_note(note_title)
         self.open_note_window(note_title, note_content)
 
+
     def on_open_selection_clicked(self, icon_view, tree_path):
         model = icon_view.get_model()
-        row_number = tree_path.get_indices()[0] # since we always only have one selected element
+         # since we always only have one selected element
+        row_number = tree_path.get_indices()[0]
         note_title = model[row_number][1]
-        return self.note_file_io.read_note(note_title)
+        note_content = self.note_file_io.read_note(note_title)
+        self.open_note_window(note_title, note_content)
     
-    def on_cancel_button_clicked(self, _):
-        self.destroy()
 
     def open_note_window(self, note_title = "", note_content = ""):
         # TODO: Make note_title selectable when creating new note
         if note_title == "":
             note_title = "Unnamed"
-        note_window = Note(note_title, note_content)
+        note_window = Note(self, note_title, note_content)
+        note_window.connect("destroy", lambda window : self.show())
         note_window.show_all()
-        # self.close()
+        self.hide()
         
