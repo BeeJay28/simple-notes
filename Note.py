@@ -24,12 +24,12 @@ class Note(Gtk.Window):
         self.window_vbox = Gtk.Box()
         self.window_vbox.set_orientation(Gtk.Orientation.VERTICAL)
 
-        self.setup_textview(note_content)
+        self.setup_title_and_textview(note_content)
 
         self.setup_buttons()
 
-        self.window_vbox.pack_start(self.title_entry, True, True, 20)
-        self.window_vbox.pack_start(self.scrolled_text_window, True, True, 20)
+        self.window_vbox.pack_start(self.title_entry, False, False, 0)
+        self.window_vbox.pack_start(self.scrolled_text_window, True, True, 0)
         self.window_vbox.pack_start(self.bbar_hbox, False, False, 20)
 
         self.set_titlebar(self.headerbar)
@@ -64,7 +64,6 @@ class Note(Gtk.Window):
 
 
     def show_confirmation_dialog(self, _):
-        """'on_yes' should be a function that runs if the confirmation dialog is confirmed"""
         dialog = Gtk.MessageDialog(
             parent=self,
             flags=Gtk.DialogFlags.MODAL,
@@ -77,13 +76,15 @@ class Note(Gtk.Window):
         dialog.show()
 
 
-    def on_dialog_confirmation_response(self, dialog, response_id, on_yes):
-        self.parent.show()
+    def on_dialog_confirmation_response(self, dialog, response_id):
+        if response_id == Gtk.ResponseType.YES:
+            self.parent.show()
+            self.destroy()
+
         dialog.destroy()
-        self.destroy()
 
 
-    def setup_textview(self, note_content):
+    def setup_title_and_textview(self, note_content):
         self.title_entry = Gtk.Entry()
         self.title_entry.set_editable(True)
         self.title_entry.set_text(self.note_title)
@@ -98,8 +99,7 @@ class Note(Gtk.Window):
         # self.title_entry.set_attributes(attr_list)
 
         self.scrolled_text_window = Gtk.ScrolledWindow()
-        self.scrolled_text_window.set_size_request(200, 400)
-        # TODO: Add "(edited)" sub_title when buffer is modified
+        self.scrolled_text_window.set_size_request(300, 200)
 
         self.text_view = Gtk.TextView()
         self.text_view.set_wrap_mode(Gtk.WrapMode.NONE)
@@ -107,19 +107,12 @@ class Note(Gtk.Window):
         self.text_view.set_left_margin(10)
         buffer = self.text_view.get_buffer()
         buffer.set_text(note_content, -1)
-        buffer.connect("modified-changed", self.show_modified_in_header)
+        buffer.connect("changed", lambda buffer : self.headerbar.set_subtitle("modified"))
 
         # Focus on textView AFTER all widgets are created and mapped properly
         self.connect("realize", lambda window : self.text_view.grab_focus())
 
         self.scrolled_text_window.add(self.text_view)
-
-    
-    def show_modified_in_header(self, buffer):
-        if buffer.get_modified():
-            self.headerbar.set_subtitle("modified")
-        else:
-            self.headerbar.set_subtitle("asd")
 
 
     def setup_headerbar(self):
@@ -134,4 +127,4 @@ class Note(Gtk.Window):
             return
         note_content = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
         self.note_file_io.save_note(self.note_title, note_content)
-        buffer.set_modified(False)
+        self.headerbar.set_subtitle("")
