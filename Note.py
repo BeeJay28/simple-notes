@@ -122,9 +122,14 @@ class Note(Gtk.Window):
         
 
     def save_note(self, _):
-        buffer = self.text_view.get_buffer()
-        if not buffer.get_modified():
+        content_buffer = self.text_view.get_buffer()
+        title_buffer = self.title_entry.get_buffer()
+        if not (content_buffer.get_modified() or title_buffer.get_modified()):
             return
-        note_content = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+        note_content = content_buffer.get_text(content_buffer.get_start_iter(), content_buffer.get_end_iter(), True)
+        current_note_title = title_buffer.get_text()
+        if self.note_title != current_note_title:
+            self.note_file_io.rename_note(self.note_title, current_note_title)
+            self.note_title = current_note_title
         self.note_file_io.save_note(self.note_title, note_content)
         self.headerbar.set_subtitle("")

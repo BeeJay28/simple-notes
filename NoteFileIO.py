@@ -23,3 +23,10 @@ class NoteFileIO():
         with open(file_path, "r", encoding="UTF-8") as file:
             note = file.read()
         return note
+
+    def rename_note(self, old_note_title, new_note_title):
+        old_file_path = self.notes_path.joinpath(Path(f"{old_note_title}.pln"))
+        if not old_file_path.exists():
+            return
+        new_file_path = self.notes_path.joinpath(Path(f"{new_note_title}.pln"))
+        old_file_path.rename(new_file_path)
