@@ -17,6 +17,8 @@ class Note(Gtk.Window):
 
         self.setup_note_window(note_content)
 
+        self.connect("delete-event", parent.refresh_store)
+
 
     def setup_note_window(self, note_content):
         self.setup_headerbar()

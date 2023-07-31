@@ -21,8 +21,6 @@ class NotePicker(Gtk.Window):
         self.add(notepicker_window)
 
 
-    # TODO: Refresh the filesystem by adding newly added notes into it, either by adding it to the store on add
-    # OR by reloading the entire thing by using the "map-event" signal from this window
     def get_files_store(self):
         note_files = self.note_file_io.get_note_files()
 
@@ -34,19 +32,22 @@ class NotePicker(Gtk.Window):
         
         return liststore
     
+    def refresh_store(self, note, event):
+        store = self.get_files_store()
+        self.icon_view.set_model(store)
 
     def setup_notepicker_window(self, liststore):
         main_vbox = Gtk.Box()
         main_vbox.set_orientation(Gtk.Orientation.VERTICAL)
         main_vbox.set_spacing(2)
 
-        icon_view = Gtk.IconView()
-        icon_view.set_model(liststore)
-        icon_view.set_pixbuf_column(0)
-        icon_view.set_text_column(1)
-        icon_view.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        icon_view.set_activate_on_single_click(False)
-        icon_view.connect("item-activated", self.on_open_selection_clicked)
+        self.icon_view = Gtk.IconView()
+        self.icon_view.set_model(liststore)
+        self.icon_view.set_pixbuf_column(0)
+        self.icon_view.set_text_column(1)
+        self.icon_view.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        self.icon_view.set_activate_on_single_click(False)
+        self.icon_view.connect("item-activated", self.on_open_selection_clicked)
 
         bbar = Gtk.ButtonBox()
         bbar.set_orientation(Gtk.Orientation.HORIZONTAL)
@@ -55,12 +56,12 @@ class NotePicker(Gtk.Window):
 
         open_button = Gtk.Button(label="Open")
         create_button = Gtk.Button(label="Create")
-        open_button.connect("clicked", self.on_open_button_clicked, icon_view)
+        open_button.connect("clicked", self.on_open_button_clicked, self.icon_view)
         create_button.connect("clicked", lambda _ : self.open_new_note_window())
         bbar.add(open_button)
         bbar.add(create_button)
 
-        main_vbox.pack_start(icon_view, True, True, 20)
+        main_vbox.pack_start(self.icon_view, True, True, 20)
         main_vbox.pack_start(bbar, False, False, 20)
 
         return main_vbox
