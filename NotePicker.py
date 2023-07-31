@@ -57,7 +57,7 @@ class NotePicker(Gtk.Window):
         create_button = Gtk.Button(label="Create")
         exit_button = Gtk.Button(label="Exit")
         open_button.connect("clicked", self.on_open_button_clicked, icon_view)
-        create_button.connect("clicked", lambda _ : self.open_note_window())
+        create_button.connect("clicked", lambda _ : self.open_new_note_window())
         bbar.add(open_button)
         bbar.add(create_button)
 
@@ -72,27 +72,29 @@ class NotePicker(Gtk.Window):
             return
         
         tree_path = icon_view.get_selected_items()[0]
+        self.open_existing_note(icon_view, tree_path)
+
+
+    def on_open_selection_clicked(self, icon_view, tree_path):
+        self.open_existing_note(icon_view, tree_path)
+
+
+    def open_existing_note(self, icon_view, tree_path):
         model = icon_view.get_model()
         # since we always only have one selected element
         row_number = tree_path.get_indices()[0]
         note_title = model[row_number][1]
         note_content = self.note_file_io.read_note(note_title)
-        self.open_note_window(note_title, note_content)
+        self.open_existing_note_window(note_title, note_content)
 
 
-    def on_open_selection_clicked(self, icon_view, tree_path):
-        model = icon_view.get_model()
-         # since we always only have one selected element
-        row_number = tree_path.get_indices()[0]
-        note_title = model[row_number][1]
-        note_content = self.note_file_io.read_note(note_title)
-        self.open_note_window(note_title, note_content)
-    
+    def open_new_note_window(self):
+        note_window = Note(self, "Unnamed", "")
+        note_window.connect("destroy", lambda window : self.show())
+        note_window.show_all()
+        self.hide()
 
-    def open_note_window(self, note_title = "", note_content = ""):
-        # TODO: Make note_title selectable when creating new note
-        if note_title == "":
-            note_title = "Unnamed"
+    def open_existing_note_window(self, note_title, note_content):
         note_window = Note(self, note_title, note_content)
         note_window.connect("destroy", lambda window : self.show())
         note_window.show_all()
