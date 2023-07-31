@@ -55,7 +55,6 @@ class NotePicker(Gtk.Window):
 
         open_button = Gtk.Button(label="Open")
         create_button = Gtk.Button(label="Create")
-        exit_button = Gtk.Button(label="Exit")
         open_button.connect("clicked", self.on_open_button_clicked, icon_view)
         create_button.connect("clicked", lambda _ : self.open_new_note_window())
         bbar.add(open_button)
