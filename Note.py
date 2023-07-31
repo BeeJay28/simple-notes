@@ -3,7 +3,7 @@ import gi
 from NoteFileIO import NoteFileIO
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, Pango
+from gi.repository import Gtk, Gdk
 
 class Note(Gtk.Window):
     def __init__(self, parent, note_title, note_content = ""):
@@ -64,16 +64,18 @@ class Note(Gtk.Window):
 
 
     def show_confirmation_dialog(self, _):
-        dialog = Gtk.MessageDialog(
-            parent=self,
-            flags=Gtk.DialogFlags.MODAL,
-            type=Gtk.MessageType.QUESTION,
-            buttons=Gtk.ButtonsType.YES_NO,
-            message_format="Are you sure?"
-        )
+        # dialog = Gtk.MessageDialog(
+        #     parent=self,
+        #     flags=Gtk.DialogFlags.MODAL,
+        #     type=Gtk.MessageType.QUESTION,
+        #     buttons=Gtk.ButtonsType.YES_NO,
+        #     message_format="Are you sure?"
+        # )
 
-        dialog.connect("response", self.on_dialog_confirmation_response)
-        dialog.show()
+        # dialog.connect("response", self.on_dialog_confirmation_response)
+        # dialog.show()
+        self.parent.show()
+        self.destroy()
 
 
     def on_dialog_confirmation_response(self, dialog, response_id):
