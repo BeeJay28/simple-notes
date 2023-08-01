@@ -66,7 +66,7 @@ class Note(Gtk.Window):
         )
 
 
-    def show_confirmation_dialog(self, _):
+    def show_confirmation_dialog(self, button):
         # BUG: Setting a constructor-param to `self` crashes cinnamon desktop environment
         dialog = Gtk.MessageDialog(
             text="Are you sure?",
@@ -121,7 +121,7 @@ class Note(Gtk.Window):
         self.headerbar.set_show_close_button(True)
         
 
-    def save_note(self, _):
+    def save_note(self, button):
         content_buffer = self.text_view.get_buffer()
         title_buffer = self.title_entry.get_buffer()
         if not (content_buffer.get_modified() or title_buffer.get_modified()):

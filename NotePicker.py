@@ -30,7 +30,7 @@ class NotePicker(Gtk.Window):
 
         pixbuf = Gtk.IconTheme.get_default().load_icon(icon, 64, 0)
         for note_file in note_files:
-            liststore.append([pixbuf, note_file.stem]) # FIXME: oder .split(".")[0]
+            liststore.append([pixbuf, note_file.stem])
         
         return liststore
     
