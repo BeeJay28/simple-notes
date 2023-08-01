@@ -32,7 +32,7 @@ class NotePicker(Gtk.Window):
         
         return liststore
     
-    def refresh_store(self, note, event):
+    def refresh_store(self, note_window):
         store = self.get_files_store()
         self.icon_view.set_model(store)
 
