@@ -67,26 +67,23 @@ class Note(Gtk.Window):
 
 
     def show_confirmation_dialog(self, _):
-        # dialog = Gtk.MessageDialog(
-        #     parent=self,
-        #     flags=Gtk.DialogFlags.MODAL,
-        #     type=Gtk.MessageType.QUESTION,
-        #     buttons=Gtk.ButtonsType.YES_NO,
-        #     message_format="Are you sure?"
-        # )
-
-        # dialog.connect("response", self.on_dialog_confirmation_response)
-        # dialog.show()
-        self.parent.show()
-        self.destroy()
+        # BUG: Setting a constructor-param to `self` crashes cinnamon desktop environment
+        dialog = Gtk.MessageDialog(
+            text="Are you sure?",
+            flags=0,
+            message_type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.YES_NO
+        )
+        dialog.format_secondary_text("Any unsaved progress will be deleted")
+        dialog.connect("response", self.on_dialog_confirmation_response)
+        dialog.run() # also turns dialog modal
+        dialog.destroy()
 
 
     def on_dialog_confirmation_response(self, dialog, response_id):
         if response_id == Gtk.ResponseType.YES:
             self.parent.show()
             self.destroy()
-
-        dialog.destroy()
 
 
     def setup_title_and_textview(self, note_content):
