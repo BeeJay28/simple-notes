@@ -3,7 +3,7 @@ import gi
 from NoteFileIO import NoteFileIO
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, Pango
 
 class Note(Gtk.Window):
     def __init__(self, parent, note_title, note_content):
@@ -94,14 +94,12 @@ class Note(Gtk.Window):
         self.title_entry.set_editable(True)
         self.title_entry.set_text(self.note_title)
 
-        # attr_list = Pango.AttrList()
-        # font_desc = Pango.FontDescription()
-        # font_desc.set_family("Arial")
-        # font_desc.set_size(20)
-        # font_desc.set_weight(Pango.Weight.BOLD)
-        # attr_font_desc = Pango.AttrFontDesc().new(font_desc)
-        # attr_list.insert(attr_font_desc)
-        # self.title_entry.set_attributes(attr_list)
+        # Setup title style
+        attr_list = Pango.AttrList()
+        font_desc = Pango.FontDescription("Arial Semi-Bold 20")
+        attr_font_desc = Pango.AttrFontDesc().new(font_desc)
+        attr_list.insert(attr_font_desc)
+        self.title_entry.set_attributes(attr_list)
 
         self.scrolled_text_window = Gtk.ScrolledWindow()
         self.scrolled_text_window.set_size_request(300, 200)
