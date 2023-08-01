@@ -14,6 +14,7 @@ class Note(Gtk.Window):
         self.note_file_io = NoteFileIO()
         self.set_transient_for(self.parent)
         self.set_destroy_with_parent(True)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
 
         self.setup_note_window(note_content)
 
