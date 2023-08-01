@@ -19,6 +19,8 @@ class NotePicker(Gtk.Window):
         notepicker_window = self.setup_notepicker_window(store)
 
         self.add(notepicker_window)
+        self.set_size_request(200, 200)
+        self.set_default_size(800, 640)
 
 
     def get_files_store(self):
@@ -49,6 +51,9 @@ class NotePicker(Gtk.Window):
         self.icon_view.set_activate_on_single_click(False)
         self.icon_view.connect("item-activated", self.on_open_selection_clicked)
 
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.add(self.icon_view)
+
         bbar = Gtk.ButtonBox()
         bbar.set_orientation(Gtk.Orientation.HORIZONTAL)
         bbar.set_spacing(2)
@@ -61,7 +66,7 @@ class NotePicker(Gtk.Window):
         bbar.add(open_button)
         bbar.add(create_button)
 
-        main_vbox.pack_start(self.icon_view, True, True, 20)
+        main_vbox.pack_start(scrolled_window, True, True, 20)
         main_vbox.pack_start(bbar, False, False, 20)
 
         return main_vbox
