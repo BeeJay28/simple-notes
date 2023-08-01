@@ -6,6 +6,8 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
 
 class Note(Gtk.Window):
+    is_text_content_modified = False
+
     def __init__(self, parent, note_title, note_content):
         super().__init__()
 
@@ -47,7 +49,7 @@ class Note(Gtk.Window):
         self.save_button = Gtk.Button(label="Save")
         self.close_button = Gtk.Button(label="Close")
         self.save_button.connect("clicked", self.save_note)
-        self.close_button.connect("clicked", self.show_confirmation_dialog)
+        self.close_button.connect("clicked", self.show_confirmation_dialog_if_modified)
         self.add_keybinding_for_saving()
 
         self.bbar_hbox.pack_start(self.save_button, True, False, 20)
@@ -66,24 +68,30 @@ class Note(Gtk.Window):
         )
 
 
-    def show_confirmation_dialog(self, button):
-        # BUG: Setting a constructor-param to `self` crashes cinnamon desktop environment
-        dialog = Gtk.MessageDialog(
-            text="Are you sure?",
-            flags=0,
-            message_type=Gtk.MessageType.QUESTION,
-            buttons=Gtk.ButtonsType.YES_NO
-        )
-        dialog.format_secondary_text("Any unsaved progress will be deleted")
-        dialog.connect("response", self.on_dialog_confirmation_response)
-        dialog.run() # also turns dialog modal
-        dialog.destroy()
+    def show_confirmation_dialog_if_modified(self, button):
+        if self.is_text_content_modified:
+            # BUG: Setting a constructor-param to `self` crashes cinnamon desktop environment
+            dialog = Gtk.MessageDialog(
+                text="Are you sure?",
+                flags=0,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO
+            )
+            dialog.format_secondary_text("Any unsaved progress will be deleted")
+            dialog.connect("response", self.on_dialog_confirmation_response)
+            dialog.run() # also turns dialog modal
+            dialog.destroy()
+        else:
+            self.close_note()
 
 
     def on_dialog_confirmation_response(self, dialog, response_id):
         if response_id == Gtk.ResponseType.YES:
-            self.parent.show()
-            self.destroy()
+            self.close_note()
+
+    def close_note(self):
+        self.parent.show()
+        self.destroy()
 
 
     def setup_title_and_textview(self, note_content):
@@ -107,12 +115,16 @@ class Note(Gtk.Window):
         self.text_view.set_left_margin(10)
         buffer = self.text_view.get_buffer()
         buffer.set_text(note_content, -1)
-        buffer.connect("changed", lambda buffer : self.headerbar.set_subtitle("modified"))
+        buffer.connect("changed", self.on_text_content_modified)
 
         # Focus on textView AFTER all widgets are created and mapped properly
         self.connect("realize", lambda window : self.text_view.grab_focus())
 
         self.scrolled_text_window.add(self.text_view)
+
+    def on_text_content_modified(self, buffer):
+        self.is_text_content_modified = True
+        self.headerbar.set_subtitle("modified")
 
 
     def setup_headerbar(self):
@@ -130,6 +142,7 @@ class Note(Gtk.Window):
         self.rename_file_if_necessary(title_buffer)
         self.note_file_io.save_note(self.note_title, note_content)
         self.headerbar.set_title(self.note_title)
+        self.is_text_content_modified = False
         self.headerbar.set_subtitle("")
 
     def rename_file_if_necessary(self, title_buffer):
