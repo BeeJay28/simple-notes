@@ -132,9 +132,13 @@ class Note(Gtk.Window):
         if not (content_buffer.get_modified() or title_buffer.get_modified()):
             return
         note_content = content_buffer.get_text(content_buffer.get_start_iter(), content_buffer.get_end_iter(), True)
+        self.rename_if_necessary(title_buffer)
+        self.note_file_io.save_note(self.note_title, note_content)
+        self.headerbar.set_title(self.note_title)
+        self.headerbar.set_subtitle("")
+
+    def rename_if_necessary(self, title_buffer):
         current_note_title = title_buffer.get_text()
         if self.note_title != current_note_title:
             self.note_file_io.rename_note(self.note_title, current_note_title)
             self.note_title = current_note_title
-        self.note_file_io.save_note(self.note_title, note_content)
-        self.headerbar.set_subtitle("")
