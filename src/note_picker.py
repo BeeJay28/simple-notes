@@ -1,11 +1,11 @@
 import gi
-from Note import Note
+from note import Note
 
 gi.require_version("Gtk", "3.0")
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk, GdkPixbuf
 
-from NoteFileIO import NoteFileIO
+from note_file_io import NoteFileIO
 
 icon = "edit-copy"
 

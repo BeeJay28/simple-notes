@@ -1,6 +1,6 @@
 import gi
 
-from NoteFileIO import NoteFileIO
+from note_file_io import NoteFileIO
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
