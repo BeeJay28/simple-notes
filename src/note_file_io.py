@@ -2,7 +2,7 @@ from pathlib import Path
 
 class NoteFileIO():
     """Naming policy: filename = {note_title}.pln"""
-    _NOTES_DIR_NAME = "simple_notes"
+    _NOTES_DIR_NAME = "simple-notes"
     _notes_path = None
     
     @classmethod
