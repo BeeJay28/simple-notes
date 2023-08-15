@@ -90,6 +90,7 @@ class Note(Gtk.Window):
             self.close_note()
 
     def close_note(self):
+        self.parent.reload()
         self.parent.show()
         self.destroy()
 

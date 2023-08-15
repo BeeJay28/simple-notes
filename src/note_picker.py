@@ -23,6 +23,12 @@ class NotePicker(Gtk.Window):
         self.set_default_size(800, 640)
 
 
+    # Must not be called before finishing initial setup
+    def reload(self):
+        refreshed_store = self.get_files_store()
+        self.icon_view.set_model(refreshed_store)
+
+
     def get_files_store(self):
         note_files = self.note_file_io.get_note_files()
 
@@ -60,10 +66,13 @@ class NotePicker(Gtk.Window):
         bbar.set_layout(Gtk.ButtonBoxStyle.SPREAD)
 
         open_button = Gtk.Button(label="Open")
+        delete_button = Gtk.Button(label="Delete")
         create_button = Gtk.Button(label="Create")
         open_button.connect("clicked", self.on_open_button_clicked, self.icon_view)
-        create_button.connect("clicked", lambda _ : self.open_new_note_window())
+        delete_button.connect("clicked", self.on_delete_button_clicked, self.icon_view)
+        create_button.connect("clicked", lambda button : self.open_new_note_window())
         bbar.add(open_button)
+        bbar.add(delete_button)
         bbar.add(create_button)
 
         main_vbox.pack_start(scrolled_window, True, True, 20)
@@ -72,7 +81,7 @@ class NotePicker(Gtk.Window):
         return main_vbox
     
     
-    def on_open_button_clicked(self, _, icon_view):
+    def on_open_button_clicked(self, button, icon_view):
         if len(icon_view.get_selected_items()) == 0:
             return
         
@@ -85,12 +94,39 @@ class NotePicker(Gtk.Window):
 
 
     def open_existing_note(self, icon_view, tree_path):
+        note_title = self.get_note_title(icon_view, tree_path)
+        note_content = self.note_file_io.read_note(note_title)
+        self.open_existing_note_window(note_title, note_content)
+
+    def get_note_title(self, icon_view, tree_path):
         model = icon_view.get_model()
         # since we always only have one selected element
         row_number = tree_path.get_indices()[0]
         note_title = model[row_number][1]
-        note_content = self.note_file_io.read_note(note_title)
-        self.open_existing_note_window(note_title, note_content)
+        return note_title
+
+    def on_delete_button_clicked(self, button, icon_view):
+        if len(icon_view.get_selected_items()) == 0:
+            return
+        
+        tree_path = icon_view.get_selected_items()[0]
+        note_title = self.get_note_title(icon_view, tree_path)
+
+        dialog = Gtk.MessageDialog(
+            text=f"Are you sure you want to delete {note_title}?",
+            flags=0,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.YES_NO
+        )
+        dialog.format_secondary_text("This action cannot be undone!")
+        dialog.connect("response", self.on_dialog_confirmation_response, note_title)
+        dialog.run() # also turns dialog modal
+        dialog.destroy()
+        
+    def on_dialog_confirmation_response(self, dialog, response_id, note_title):
+        if response_id == Gtk.ResponseType.YES:
+            self.note_file_io.delete_note(note_title)
+            self.reload()
 
 
     def open_new_note_window(self):

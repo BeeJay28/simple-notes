@@ -20,14 +20,17 @@ class NoteFileIO():
             is_success = file.write(note_content) != 0
         return is_success
     
+    
     def get_note_files(self):
         return self._notes_path.glob("*.pln")
     
+
     def read_note(self, note_title):
         file_path = self._notes_path.joinpath(Path(f"{note_title}.pln"))
         with open(file_path, "r", encoding="UTF-8") as file:
             note = file.read()
         return note
+
 
     def rename_note(self, old_note_title, new_note_title):
         old_file_path = self._notes_path.joinpath(Path(f"{old_note_title}.pln"))
@@ -35,3 +38,10 @@ class NoteFileIO():
             return
         new_file_path = self._notes_path.joinpath(Path(f"{new_note_title}.pln"))
         old_file_path.rename(new_file_path)
+
+    
+    def delete_note(self, note_title):
+        file_path = self._notes_path.joinpath(Path(f"{note_title}.pln"))
+        if not file_path.exists():
+            return
+        file_path.unlink()
